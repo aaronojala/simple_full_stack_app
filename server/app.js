@@ -1,77 +1,74 @@
 const express = require('express');
-const port = 5000;
+const bodyParser = require('body-parser');
+
 const app = express();
+
 const cors = require('cors');
-const dotenv = require('dotenv')
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.json());
+
+const dotenv = require('dotenv');
 dotenv.config();
 
-const dbService = require('./dbService')
+app.use(cors())
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({extended : false}));
+const atlasDb = process.env.ATLAS_DB;
 
+const mongoose = require('mongoose');
+const { reset } = require('nodemon');
+const db = mongoose.connection;
+mongoose.connect(atlasDb, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// create
-app.post('/insert', (request, response) => {
-    const { name } = request.body;
-    const db = dbService.getDbServiceInstance();
-
-    const result = db.insertNewName(name);
-
-    result
-    .then(data => response.json({ data: data }))
-    .catch(err => console.log(err));
-
+db.on('connected', function () {
+    console.log('Mongoose default connection open');
 });
 
-// read
-app.get('/getAll', (request, response) => {
-    const db = dbService.getDbServiceInstance();
-
-    const result = db.getAllData();
-
-    result
-    .then(data => response.json({data : data}))
-    .catch(err => console.log(err));
-})
-
-// update
-app.patch('/update', (request,response) => {
-    const { id, name } = request.body;
-    const db = dbService.getDbServiceInstance();
-
-    const result = db.updateNameById(id, name);
-
-    result
-    .then(data => response.json({success : data}))
-    .catch(err => console.log(err));
-})
-
-
-// delete
-app.delete('/delete/:id', (request, response) => {
-    const { id } = request.params;
-    const db = dbService.getDbServiceInstance();
-
-    const result = db.deleteRowById(id);
-
-    result
-    .then(data => response.json({success : data}))
-    .catch(err => console.log(err));
+// If the connection throws an error
+db.on('error', function (err) {
+    console.log('Mongoose default connection error: ' + err);
 });
 
-// search
-app.get('/search/:name', (request, response) => {
-    const { name } = request.params;
-    const db = dbService.getDbServiceInstance();
+// When the connection is disconnected
+db.on('disconnected', function () {
+    console.log('Mongoose default connection disconnected');
+});
 
-    const result = db.searchByName(name);
 
-    result
-    .then(data => response.json({data : data}))
-    .catch(err => console.log(err));
+const Schema = mongoose.Schema;
 
+const postSchema = new Schema({
+    title: String,
+    content: String,
+    hidden: Boolean,
+    author: String,
+    views: Number
 })
 
-app.listen(port, () => console.log('app is running'));
+const Post = mongoose.model('Post', postSchema);
+
+app.get('/', (req, res) => {
+    res.send('hello world')
+})
+
+app.post('/addNewPost', (req, res) => {
+    const newPost = new Post({
+        title: req.body.title,
+        content: req.body.content
+    });
+
+    newPost.save().then(() => console.log('Successfully saved a new Post to MongoDB'))
+    res.send('Received post')
+})
+
+app.get('/allPost', (req, res) => {
+    Post.find({}, (err, posts) => {
+        if (err) console.log(err)
+        else res.json(posts)
+    })
+})
+
+app.listen(5000, () => {
+    console.log('Listening on port', 5000)
+})

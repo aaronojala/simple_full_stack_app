@@ -2,39 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Web App</title>
+    <title>Test Form</title>
 </head>
 <body>
-    <main>
-        <label>Name:</label>
-        <input type="text" id="name-input">
-        <button id="add-name-btn">Add Name</button>
+    <form>
+        <label for="title">Post title:</label><br>
+        <input type="text" id="title" name="title"><br>
+        <label for="content">Post Content:</label><br>
+        <textarea id="content" name="content" rows="4" cols="50"></textarea>
+        <br/>
+        <button type="submit">Create new Post</button>
+    </form>
 
-        <div id="searchbar">
-            <input placeholder="search by name"
-            id="search-input">
-            <button id="search-btn">Search</button>
-        </div>
-
-        <table id="table">
-            <thead>
-                <th>TD</th>
-                <th>Name</th>
-                <th>Date Added</th>
-                <th>Delete</th>
-                <th>Edit</th>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <section hidden id="update-row">
-            <label>Name:</label>
-            <input type="text" id="update-name-input">
-            <button id="update-row-btn">Update</button>
-        </section>
-    </main>
-    <script src="index.js"></script>
+    <button type="button" id="getAllPosts">Get All Posts</button>
+    <script src="script.js"></script>
 </body>
 </html>
